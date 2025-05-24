@@ -1,7 +1,7 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import urllib.parse
-from os import path
+import os
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -16,9 +16,12 @@ class handler(BaseHTTPRequestHandler):
             params = urllib.parse.parse_qs(query)
             names = params.get('name', [])
             
+            # Get absolute path to JSON file
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            json_path = os.path.join(current_dir, '..', 'q-vercel-python.json')
+            
             # Load marks data
-            file_path = path.join(path.dirname(__file__), '..', 'q-vercel-python.json')
-            with open(file_path) as f:
+            with open(json_path) as f:
                 data = json.load(f)
             
             # Get marks
@@ -26,6 +29,6 @@ class handler(BaseHTTPRequestHandler):
             
             response = {"marks": marks}
         except Exception as e:
-            response = {"error": str(e)}
+            response = {"error": str(e), "path": self.path}
         
         self.wfile.write(json.dumps(response).encode('utf-8'))
